@@ -71,6 +71,7 @@ Below the configuration used for the Provincia di Bolzano Harvester::
 			"private_datasets": "False", 
 			"version": "2.6", 
 			"harvest_iso_categories": "True",
+			"default_extras": {"geocat_layer_url": "http://geocatalogo.retecivica.bz.it/geokatalog/#!home&layer="},
 			"group_mapping": {
 				"farming": "farming", 
 				"utilitiesCommunication": "boundaries", 
