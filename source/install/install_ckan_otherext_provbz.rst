@@ -17,7 +17,7 @@ unofficial extensions.
 Provincia Di Bolzano Extension
 ==============================
 
-The ckanext-provbz CKAN's extension provide some customizations for the CKAN Look and Feel.
+The ckanext-provbz CKAN's extension provides some customizations for the CKAN Look and Feel and other.
 In addition this extension provides an harvester that merge functionalities between two other 
 harvesters built on the ckanext-spatial extension like:
 
@@ -28,7 +28,12 @@ harvesters built on the ckanext-spatial extension like:
 Requirements
 ------------
 
-The ckanext-multilang extension has been developed for CKAN 2.4 or later.
+The ckanext-provbz extension has been developed for CKAN 2.4.
+Other extensions needed as dependencies are:
+
+- https://github.com/geosolutions-it/ckanext-multilang
+- https://github.com/geosolutions-it/ckanext-geonetwork
+- https://github.com/geosolutions-it/ckanext-pages
 
 ------------------------
 Development Installation
@@ -72,6 +77,18 @@ as explained in :ref:`geonetwork_harvester_params`, such as:
 * handling the ``default_tags`` and ``default_extras`` parameters;
 * adding a couple of ``extras`` entries which contain URLs to GeoNetwork info.
 
+------------
+Requirements
+------------
+
+The ckanext-multilang extension has been developed for CKAN 2.2 or later.
+Other extensions needed as dependencies are:
+
+- https://github.com/geosolutions-it/ckanext-spatial
+
+------------
+Installation
+------------
 
 In order to install the extension, log in as user ``ckan``, activate the virtual env and check out the extension::
 
@@ -103,11 +120,24 @@ dropdown, the User will be able to edit again the same Dataset in order to speci
 for the new selected language. In this way Dataset's title and description will automatically changed simply switching the 
 language from the CKAN's dropdonw.
 
+------------
+Requirements
+------------
+
+The ckanext-multilang extension has been developed for CKAN 2.4.
+Other extensions needed as dependencies are:
+
+- https://github.com/geosolutions-it/ckanext-spatial
+
 .. warning:: The ckanext-multilang provides also an harvester built on the ckanext-spatial extension, and inherits all of its functionalities. Currently a forked branch of the stable ckanext-spatial extension is used in order to allow an after import stage functionality (used for the ckanext-multilang persistence):
 
 			 https://github.com/geosolutions-it/ckanext-spatial/tree/stable_official_after_imp_st
 			 
 			 Installing the ckanext-multilang extension make sure to use this fork and branch of the ckanext-spatial. The update will be ported on the official branch as soon as possible.
+
+------------
+Installation
+------------
 
 In order to install the extension, log in as user ``ckan``, activate the virtual env and check out the extension::
 
@@ -151,6 +181,52 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
 
 				ckan.plugins = shibboleth datastore harvest ckan_harvester provbz_theme spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view multilang multilang_harvester provbz_harvester
 
+===============
+Pages Extension
+===============
+
+This extension gives you an easy way to add simple pages to CKAN.
+
+------------
+Requirements
+------------
+
+The ckanext-pages extension has been developed for CKAN 2.3 or later.
+
+------------
+Installation
+------------
+
+Activate your CKAN virtual environment::
+
+   . /usr/lib/ckan/default/bin/activate
+
+Go into your CKAN path for extension::
+
+   cd /usr/lib/ckan/default/src
+
+Import the project from the github repository and install it::
+
+   git clone https://github.com/geosolutions-it/ckanext-pages.git
+   cd ckanext-pages
+   git checkout multilang
+   python setup.py install
+
+Configure the extension in the CKAN's configuration file::
+	
+	vim /etc/ckan/default/production.ini
+
+Add the following configuration lines::
+
+	# Ckan Pages config options
+	ckanext.pages.allow_html = True
+	ckanext.pages.editor = ckeditor
+
+Enable the plugin by appending the name of the extension to the plugin property::
+
+	ckan.plugins = ... pages
+	
+Finally restart CKAN.
 
 ====================
 Shibboleth Extension
@@ -159,7 +235,6 @@ Shibboleth Extension
 The Shibboleth plugin will allow users to log in into CKAN using an existing Shibboleh environment.  
 
 .. hint:: The CKAN shibboleth plugin repository is at http://github.com/geosolutions-it/ckanext-shibboleth
-
 
 ------------
 Installation
@@ -178,7 +253,6 @@ Import the project from the github repository and install it::
    git clone https://github.com/geosolutions-it/ckanext-shibboleth.git
    cd ckanext-shibboleth
    python setup.py install
-
         
 --------------------	
 Plugin configuration
