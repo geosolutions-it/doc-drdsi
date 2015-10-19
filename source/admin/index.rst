@@ -10,4 +10,5 @@ Administration
    harvesting
    users
    edit_dataset
+   pages
    
