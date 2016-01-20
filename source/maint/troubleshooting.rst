@@ -52,3 +52,17 @@ It should be caused by changes in an harvesting source.
    redis-cli flushall
 - As root user, restart CKAN ::
    systemctl restart supervisord
+   
+Managing Solr Indexes
+---------------------
+
+If for any reason the Solr indexes will be corrupted, ask Ckan to rebuild them.
+
+Activate the virtual environment::
+
+	. /usr/lib/ckan/default/bin/activate
+	
+Then rebuild the Solr indexes::
+
+	paster --plugin=ckan search-index rebuild  -c /etc/ckan/default/production.ini
+
