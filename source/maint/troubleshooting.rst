@@ -65,4 +65,23 @@ Activate the virtual environment::
 Then rebuild the Solr indexes::
 
 	paster --plugin=ckan search-index rebuild  -c /etc/ckan/default/production.ini
+	
+   
+Adding a new CKAN Administrator
+-------------------------------
 
+Activate the virtual environment::
+
+	. /usr/lib/ckan/default/bin/activate
+
+Then add a new admin user using the following command (replace the USERNAME with the real name of the user)::
+
+	paster --plugin=ckan sysadmin add USERNAME --config=/etc/ckan/default/production.ini
+
+If you want to change an user password use instead the following command::
+
+	paster --plugin=ckan user setpass USERNAME -c /etc/ckan/default/production.ini
+
+Finally for listing the existing users in Ckan::
+
+	paster --plugin=ckan user list -c /etc/ckan/default/production.ini
