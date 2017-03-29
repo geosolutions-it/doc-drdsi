@@ -147,7 +147,7 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
 
 1. Activate your CKAN virtual environment, for example::
 
-     . /usr/lib/ckan/default/bin/activate
+	. /usr/lib/ckan/default/bin/activate
 
 2. Go into your CKAN path for extension (like /usr/lib/ckan/default/src)
 
