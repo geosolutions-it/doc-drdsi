@@ -87,7 +87,7 @@ Installing base packages
 Internal clock sync
 -------------------
 
-CentOS 7 default is to use Chrony::
+CentOS 7 default is to use Chrony
 
 Install Chrony with the following command::
 
@@ -300,8 +300,6 @@ Installing java
 CentOS
 ------
 
-::
-
 For CentOS systems, you can download the JDK RPM from this page:
 
   http://www.oracle.com/technetwork/java/javase/downloads/index.html
@@ -312,8 +310,6 @@ You may start downloading the JDK RPM from a browser, and then either:
 * stop the download from the browser and use on the server the dynamic download URL your browser has been assigned, or
 * finish the download and transfer the JDK RPM to the server using ``scp``.
 * install the RPM using the following command line
-
-::
 
   rpm -ivh jdk-7u51-linux-x64.rpm
 

@@ -10,4 +10,5 @@ Installation
    setup_centos.rst
    install_ckan.rst
    install_ckan_otherext_provbz.rst
+   install_ckan_dcatapit.rst
    customize_ckan_gui.rst
