@@ -427,6 +427,8 @@ ckanext-shibboleth extension should be just appended to the existing ones ('it' 
 5 - Repete the steps above for the 'de' locales and finally restart CKAN.
 	
 
+.. _ckanext-gsreports-extension:
+
 =================
 Reports extension
 =================
@@ -564,10 +566,107 @@ Each report can be exported to either CSV or JSON format.
 
     Data export will return data only for current view, so, for examp,e if report view shows data filtered by organization, export will also retun data filtered for specific organization only.
 
+.. _ckanext-extras-extension:
+
+================
+Extras extension
+================
+
+The ckanext-extras CKAN's extension provides `external_resource_list action`, which returns list of public resources, which are not local (are served by external service).
+
+------------
+Installation
+------------
+
+Installing all the other extensions required
+
+1. Activate your CKAN virtual environment, for example:
+
+.. code::
+
+    . /usr/lib/ckan/default/bin/activate
+
+2. Go into your CKAN path for extension (like /usr/lib/ckan/default/src):
+
+.. code::
+
+    git clone https://github.com/geosolutions-it/ckanext-extras.git
+    cd ckanext-extras
+    pip install -e .
+
+3. Add `external_resource_list` to the `ckan.plugins` setting in your CKAN config file (by default the config file is located at `/etc/ckan/default/production.ini`).
+
+4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+
+.. code::
+
+    sudo service apache2 reload
 
 
+-------------
+Configuration
+-------------
 
 
+This extension uses `ckan.site_url` value to resolve if url is external. If url starts with local site value, it will be considered as local.
+
+However, it may came to situation, that single site url is insufficient. For that case, you can add `ckanext.extras.local_sites` to config. This can be a string or list of strings with base urls, which should be considered as local.
+
+Additionally, urls that starts with values from local sites, may be actually external (proxied from external sites). In that case, you can also set `ckanext.extras.external_sites`
+
+To establish if url is external in such scenario, url will be checked with external sites first (if url starts with external site prefix, it will be considered external at this point), then with local sites (if url starts with local site prefix, it will be considered local). If none of those checks will provide result, url will eventually be considered as external.
+
+Example
+^^^^^^^
+
+Sample configuration:
+
+.. code::
+
+    ckan.site_url = http://public.address
+
+    ckanext.extras.local_sites =
+        http://localhost
+        http://127.0.0.1
+
+    ckanext.extras.external_sites = 
+        http://localhost/proxied
+        http://public.address/remote/
+
+.. csv-table::
+  :header: "Url","Is external?"
+
+  `http://public.address/index`,No
+  `http://public.address/remote/index`,Yes
+  `http://localhost/resource/001`,No
+  `http://localhost/proxied/resource/001`,Yes
+
+-----------------------------
+Accessing external links list
+-----------------------------
+
+External resources list is available through api, under `api/action/external_resource_list` endpoint
+
+Sample response:
+
+.. code:: json
+
+    {"help": "http://localhost:5000/api/3/action/help_show?name=external_resource_list",
+    "success": true,
+    "result": {"count": 1,
+               "data": [{"url": "https://ckan.org/documentation-and-api/", 
+                         "id": "5e26f241-d3f9-4f48-b342-03e3364ca16f",
+                         "name": "Documentation",
+                         "dataset": 
+                            {"url": "http://localhost:5000/dataset/ed66af9c-d8ee-4dd5-8a05-acbfc760a323",
+                             "id": "ed66af9c-d8ee-4dd5-8a05-acbfc760a323",
+                             "title": "Licensed dataset"}}],
+    "limit": 50, "offset": 0}}
+
+External resource list accepts two params:
+
+ * `limit` - number of items returned on a page
+ * `offset` - offset in list, calculated from item at index 0.
 
 ==================
 Document changelog
