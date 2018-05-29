@@ -426,6 +426,149 @@ ckanext-shibboleth extension should be just appended to the existing ones ('it' 
 	
 5 - Repete the steps above for the 'de' locales and finally restart CKAN.
 	
+
+=================
+Reports extension
+=================
+
+
+`ckanext-gsreports` provides aggregated information about:
+
+ * resources formats used,
+ * license types used
+ * resources which links to errorous or invalid urls.
+
+This extension uses `ckanext-reports`. Reports are generated periodically, and be visible to admin users.
+
+------------
+Installation
+------------
+
+This extension requires `ckanext-report` and `owslib` to be installed prior to using `ckanext-gsreport`.
+
+
+1. Install `ckanext-report` and init db::
+
+    $ git clone https://github.com/datagovuk/ckanext-report.git
+    $ cd ckanext-report
+    $ pip install -e .
+    $ paster --plugin=ckanext-report report initdb --config=path/to/config.ini
+
+2. Clone repository and install package::
+
+    $ git clone https://github.com/geosolutions-it/ckanext-gsreport.git
+    $ cd ckanext-gsreport
+    $ pip install -r requirements.txt
+    $ pip install -e .
+
+3. Add `status_reports` to plugins. **Note** Order of entries matters. This plugin should be placed **before** `report` plugin.::
+
+    ckan.plugins = .. status_reports report
+
+4. Run solr data reindexing (license and resource format reports are using special placeholders in solr to access data without value)::
+
+    paster --plugin=ckan search-index rebuild_fast -c /path/to/config.ini
+
+5. Run reports generation (see :ref:`ckanext-gsreports-usage` below)
+
+.. ckanext-gsreports-usage:
+
+-----
+Usage
+-----
+
+Generating reports
+^^^^^^^^^^^^^^^^^^
+
+Report can be generated in two ways:
+
+ * from CLI (this can be used to set up cron job):
+  * generate all reports::
+
+   $ paster --plugin=ckanext-report report generate --config=path/to/config.ini
+
+  * generate one report::
+
+   $ paster --plugin=ckanext-report report generate $report-name --config=path/to/config.ini
+
+ * in UI, by opening `/report` url when user opens report page for the first time (with no data in report),
+
+.. warning::
+
+    Report generation can take a while to produce results. Especially `broken-links` report may take significant amount of time, because it will check each resource for availability.
+
+.. note::
+
+   Report generation speed depends on network speed, response time from resources and number of resources to check. That is why it's recommended to run reports generation outside web process, for example with cron.
+
+
+Usage
+^^^^^
+
+Main reports view is available for admin users only. User can access it with `/reports` path, or accessing **Reports** link in the footer:
+
+.. image:: ../images/reports/reports-view-shortcut.png
+
+
+Main view
++++++++++
+
+Main view shows list of reports available:
+
+.. image:: ../images/reports/reports-view.png
+
+
+Broken links report view
+++++++++++++++++++++++++
+
+Broken links report view will show list of organizations with number of all datasets and datasets with broken links:
+
+.. image:: ../images/reports/reports-view-broken-links.png
+
+User can filter list by organization, either by selecting one from dropdown, or clicking one in in table. After selecting organization, list of broken links is more detailed, with list of actual resources, grouped by dataset. List contains links to resource, dataset and information of type of error (including response if possible).
+
+.. image:: ../images/reports/reports-view-broken-links-org.png
+
+Licenses report view
+++++++++++++++++++++
+
+Licenses report view will show types of license and number of datasets using that license. This report will show only public datasets.
+
+.. image:: ../images/reports/reports-view-licenses.png
+
+License names will link to search page which will show datasets using specific license.
+
+Resource type report view
++++++++++++++++++++++++++
+
+Resource type report will show types of formats of resources.
+
+.. image:: ../images/reports/reports-view-resource-type.png
+
+Format name links to detailed report with all resources are using that format. Additionally, detailed report can be filtered by organization.
+
+
+.. image:: ../images/reports/reports-view-resource-type-type.png
+
+
+Exporting data
+++++++++++++++
+
+Each report can be exported to either CSV or JSON format. 
+
+.. note::
+
+    Exported data may contain more data than showed in report view.
+
+.. note::
+
+    Data export will return data only for current view, so, for examp,e if report view shows data filtered by organization, export will also retun data filtered for specific organization only.
+
+
+
+
+
+
 ==================
 Document changelog
 ==================
@@ -436,4 +579,7 @@ Document changelog
 | 1.0     |      |        | Initial revision                      |
 +---------+------+--------+---------------------------------------+
 | 1.1     |      |        | Improve doc for installing shibboleth |
++---------+------+--------+---------------------------------------+
+| 1.2     | 2018 | CS     | Updated information on additional     |
+|         | 05-25|        | extensions                            |
 +---------+------+--------+---------------------------------------+
