@@ -380,6 +380,23 @@ Edit the file ``/etc/ckan/default/production.ini``
 	ckan.auth.create_user_via_web = false
 	ckan.auth.roles_that_cascade_to_sub_groups = admin
 
+ - Misc settings::
+
+    ckan.resource_proxy.max_file_size = 5242880
+
+ - External resources settings:
+   (see :ref:`Extras extension <_ckanext-extras-extension>`)::
+
+    ckanext.extras.local_sites =
+        http://127.0.0.1
+        http://localhost:8080
+        # ..(other local url prefixes)
+
+    ckanext.extras.external_sites = 
+        http://localhost:8080/geoserver
+        # ..(other remote resources with local prefixes)
+
+
 
 The file ``who.ini`` (the *Repoze.who* configuration file) needs to be accessible
 in the same directory as your CKAN config file, so create a symlink to it::
