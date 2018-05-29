@@ -668,6 +668,110 @@ External resource list accepts two params:
  * `limit` - number of items returned on a page
  * `offset` - offset in list, calculated from item at index 0.
 
+==========
+DataPusher
+==========
+
+Automatically add Data to the CKAN DataStore.
+
+.. hint::
+   Doc page at http://docs.ckan.org/projects/datapusher/en/latest/index.html
+
+As ``root`` install the WSGI apache module:: 
+
+   yum install mod_wsgi
+
+As ``ckan``, create a brand new virtualenv, and install the datapusher app in it:: 
+
+   virtualenv /usr/lib/ckan/datapusher
+   mkdir /usr/lib/ckan/datapusher/src
+   cd /usr/lib/ckan/datapusher/src
+   git clone -b stable https://github.com/ckan/datapusher.git
+   cd datapusher/
+   . ../../bin/activate
+   pip install -r requirements.txt
+   python setup.py develop
+
+Create configuration files::
+
+    cp /usr/lib/ckan/datapusher/src/datapusher/deployment/datapusher_settings.py /etc/ckan/default/datapusher_settings.py
+     
+    cp /usr/lib/ckan/datapusher/src/datapusher/deployment/datapusher.wsgi /etc/ckan/default/datapusher.wsgi
+    
+Then edit ``/etc/ckan/default/datapusher.wsgi`` and adjust the settings path from::  
+
+    os.environ['JOB_CONFIG'] = '/etc/ckan/datapusher_settings.py'
+    
+to ::
+
+    os.environ['JOB_CONFIG'] = '/etc/ckan/default/datapusher_settings.py'
+
+Then create a file name ``/etc/httpd/conf.d/94-datapusher.conf`` and add these lines::
+
+    Listen 8800
+   
+    <VirtualHost 0.0.0.0:8800>
+   
+       ServerName ckan
+   
+       # this is our app
+       WSGIScriptAlias / /etc/ckan/default/datapusher.wsgi
+   
+       # pass authorization info on (needed for rest api)
+       WSGIPassAuthorization On
+   
+       # Deploy as a daemon (avoids conflicts between CKAN instances)
+       WSGIDaemonProcess datapusher display-name=demo processes=1 threads=15
+   
+       WSGIProcessGroup datapusher
+   
+       ErrorLog /var/log/httpd/datapusher.error.log
+       CustomLog /var/log/httpd/datapusher.log combined
+   
+       <Directory "/" >
+          Require all granted
+       </Directory>
+   
+    </VirtualHost>
+
+Now let's allow connections to port 8800 in SELinux::  
+
+   semanage port -a -t http_port_t -p tcp 8800
+    
+and restart httpd in order to load the new configuration::
+
+   systemctl restart httpd
+
+Test the datapusher entrypoint with a request like ::
+
+    curl http://localhost:8800
+    
+on the same machine ckan is running on.  
+You should get a response like this::
+
+   {
+     "help": "\n        Get help at:\n        http://ckan-service-provider.readthedocs.org/."
+   }
+
+   
+Now let's make ckan aware that the datapusher is available.
+
+Edit the file ``/etc/ckan/default/production.ini`` and: 
+
+- add the ``datapusher`` plugin::
+
+     ckan.plugins = [... other plugins...] datapusher
+ 
+- remove the comments from the lines::
+
+     ckan.datapusher.formats = csv xls xlsx tsv application/csv application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+     ckan.datapusher.url = http://127.0.0.1:8800/
+     
+Eventually restart supervisord to make ckan reload the configuration::
+
+     systemctl restart supervisord
+
+
 ==================
 Document changelog
 ==================
