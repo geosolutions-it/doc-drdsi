@@ -331,7 +331,7 @@ As user ``ckan``, enter the *virtualenv* ::
    (pyenv)$ paster make-config ckan /etc/ckan/default/production.ini
 
 
-Edit the file ``/etc/ckan/default/production.ini``
+Edit the file ``/etc/ckan/default/production.ini`` (below are collected the main properties of the final installation)
 
 - DB connection parameters ::
 
@@ -357,6 +357,14 @@ Edit the file ``/etc/ckan/default/production.ini``
 	ckan.locales_offered = it de
 	ckan.locales_filtered_out =
 	
+- Translations setting (see also :ref:`extension_provbz`)::
+
+	ckan.i18n_directory = /usr/lib/ckan/default/src/ckanext-provbz/ckanext/provbz/translations
+
+- Licence file setting (see also :ref:`extension_provbz`)::
+
+	licenses_group_url = file:///usr/lib/ckan/default/src/ckanext-provbz/ckanext/provbz/licenses/ckan.json
+	
 - Metadata validator::
 
 	ckan.spatial.validator.profiles = iso19139
@@ -380,24 +388,41 @@ Edit the file ``/etc/ckan/default/production.ini``
 	ckan.auth.create_user_via_web = false
 	ckan.auth.roles_that_cascade_to_sub_groups = admin
 
- - Misc settings::
+- Misc settings::
 
-    ckan.resource_proxy.max_file_size = 5242880
+	# Resource Proxy settings
+	# Preview size limit, default: 1MB
+	ckan.resource_proxy.max_file_size = 5242880
+	
+	# CORS settings
+	ckan.cors.origin_allow_all = False
+	ckan.cors.origin_whitelist = http://test-dati.retecivica.bz.it http://test-daten.buergernetz.bz.it http://dati.retecivica.bz.it http://daten.buergernetz.bz.it
 
- - External resources settings:
-   (see :ref:`Extras extension <_ckanext-extras-extension>`)::
+- External resources settings (see also :ref:`ckanext_extras_extension`)::
 
-    ckanext.extras.local_sites =
-        http://127.0.0.1
-        http://localhost:8080
-        # ..(other local url prefixes)
+	##ckanext.extras.local_sites =
+	ckanext.extras.external_sites=http://dati.retecivica.bz.it/services
+	
+- Datapusher settings (see also :ref:`extension_datapusher`)::
 
-    ckanext.extras.external_sites = 
-        http://localhost:8080/geoserver
-        # ..(other remote resources with local prefixes)
+	## Datapusher settings
 
+	# Make sure you have set up the DataStore
 
+	ckan.datapusher.formats = csv xls xlsx tsv application/csv application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+	ckan.datapusher.url = http://127.0.0.1:8800/
+	
+- Pages settings (see also :ref:`extension_pages`)::
 
+	#Ckan pages configuration options
+	ckanext.pages.allow_html = True
+	ckanext.pages.editor = ckeditor
+
+- Setting the storage path for datastore::
+	
+	ckan.storage_path = /var/lib/ckan/upload
+
+	
 The file ``who.ini`` (the *Repoze.who* configuration file) needs to be accessible
 in the same directory as your CKAN config file, so create a symlink to it::
 

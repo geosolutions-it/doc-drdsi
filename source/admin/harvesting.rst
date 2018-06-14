@@ -154,6 +154,8 @@ Harvester with the **manual** choice will never be run automatically:
 the harvester run can be triggered by pressing the "`Reharvest`" button in the harvester administration page:
 When the "reharvest" button is pressed, the harvesting will run within the next 15 minutes.    
 
+.. _ckanext_harvesting:
+
 Frequency customizations
 ------------------------
 

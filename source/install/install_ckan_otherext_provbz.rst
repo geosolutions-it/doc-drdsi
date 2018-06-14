@@ -11,7 +11,7 @@ Introduction
 In this document you'll only find specific information for installing some CKAN official and
 unofficial extensions.
 
-.. _extension_tracker:
+.. _extension_provbz:
 
 ==============================
 Provincia Di Bolzano Extension
@@ -69,7 +69,11 @@ To install ckanext-provbz:
 
 	licenses_group_url = file:///usr/lib/ckan/default/src/ckanext-provbz/ckanext/provbz/licenses/ckan.json
 
-10. Restart CKAN.
+10. Update the production.ini configuration finding the default property ``i18n_directory`` and change the value::
+
+	ckan.i18n_directory = /usr/lib/ckan/default/src/ckanext-provbz/ckanext/provbz/translations
+
+11. Restart CKAN.
 
 ====================
 GeoNetwork harvester
@@ -184,6 +188,8 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
 .. warning:: Make sure that the final order of the plugins list into the CKAN's configuration (production.ini file) is the folowing::
 
 				ckan.plugins = shibboleth datastore harvest ckan_harvester provbz_theme spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view multilang multilang_harvester provbz_harvester
+
+.. _extension_pages:
 
 ===============
 Pages Extension
@@ -467,11 +473,13 @@ This extension requires `ckanext-report` and `owslib` to be installed prior to u
 
     ckan.plugins = .. status_reports report
 
-4. Run solr data reindexing (license and resource format reports are using special placeholders in solr to access data without value)::
+4. Restart CKAN
+
+5. Run solr data reindexing (license and resource format reports are using special placeholders in solr to access data without value)::
 
     paster --plugin=ckan search-index rebuild_fast -c /path/to/config.ini
 
-5. Run reports generation (see :ref:`ckanext-gsreports-usage` below)
+6. Run reports generation (see the section below)
 
 .. ckanext-gsreports-usage:
 
@@ -564,15 +572,39 @@ Each report can be exported to either CSV or JSON format.
 
 .. note::
 
-    Data export will return data only for current view, so, for examp,e if report view shows data filtered by organization, export will also retun data filtered for specific organization only.
+    Data export will return data only for current view, so, for example if report view shows data filtered by organization, export will also retun data filtered for specific organization only.
+	
 
-.. _ckanext-extras-extension:
+Setting the Cron Job to generate report periodically
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+#. Create a script for running your report generation
+ 
+   Create a script ``/usr/lib/ckan/run_gsreports.sh`` (in the same file system location of the harvester one see also :ref:`ckanext_harvesting`) with this content::  
+
+      . /usr/lib/ckan/default/bin/activate 
+      paster --plugin=ckanext-report report generate $@ --config=/etc/ckan/default/production.ini
+      
+   and make it executable ::
+   
+      chmod +x /usr/lib/ckan/run_gsreports.sh         
+
+#. Tell cron to run your script
+
+   Now we have to tell cron to run the script every day at 2 A.M.
+   Open the crontab in editing mode with ``crontab -e`` and add the line ::
+
+      0 2 * * * /usr/lib/ckan/run_gsreport.sh &> /usr/lib/ckan/gsreport.log
+	
+	
+.. _ckanext_extras_extension:
 
 ================
 Extras extension
 ================
 
-The ckanext-extras CKAN's extension provides `external_resource_list action`, which returns list of public resources, which are not local (are served by external service).
+The ckanext-extras CKAN's extension provides `external_resource_list` action, which returns list of public resources, which are not local (are served by external service).
 
 ------------
 Installation
@@ -596,11 +628,7 @@ Installing all the other extensions required
 
 3. Add `external_resource_list` to the `ckan.plugins` setting in your CKAN config file (by default the config file is located at `/etc/ckan/default/production.ini`).
 
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
-
-.. code::
-
-    sudo service apache2 reload
+4. Restart CKAN.
 
 
 -------------
@@ -668,6 +696,8 @@ External resource list accepts two params:
  * `limit` - number of items returned on a page
  * `offset` - offset in list, calculated from item at index 0.
 
+.. _extension_datapusher:
+ 
 ==========
 DataPusher
 ==========
