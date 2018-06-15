@@ -80,7 +80,7 @@ GeoNetwork harvester
 ====================
 
 The GeoNetwork harvester extends the base CSW harvester type, adding some features
-as explained in :ref:`geonetwork_harvester_params`, such as:
+as explained in :ref:`ckan_harvesting`, such as:
 
 * handling the ``default_tags`` and ``default_extras`` parameters;
 * adding a couple of ``extras`` entries which contain URLs to GeoNetwork info.
@@ -185,9 +185,9 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
 
 10. Restart CKAN.
 
-.. warning:: Make sure that the final order of the plugins list into the CKAN's configuration (production.ini file) is the folowing::
+.. warning:: Make sure that the final order of the plugins list into the CKAN's configuration (production.ini file) is the folowing:: 
 
-				ckan.plugins = shibboleth datastore harvest ckan_harvester provbz_theme spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view multilang multilang_harvester provbz_harvester
+	ckan.plugins = shibboleth datastore harvest ckan_harvester provbz_theme spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view multilang multilang_harvester provbz_harvester
 
 .. _extension_pages:
 
@@ -492,20 +492,21 @@ Generating reports
 
 Report can be generated in two ways:
 
- * from CLI (this can be used to set up cron job):
-  * generate all reports::
+1. From CLI (this can be used to set up cron job):
+
+- generate all reports::
 
    $ paster --plugin=ckanext-report report generate --config=path/to/config.ini
 
-  * generate one report::
+- generate one report::
 
    $ paster --plugin=ckanext-report report generate $report-name --config=path/to/config.ini
 
- * in UI, by opening `/report` url when user opens report page for the first time (with no data in report),
+2. in UI, by opening `/report` url when user opens report page for the first time (with no data in report)
 
 .. warning::
 
-    Report generation can take a while to produce results. Especially `broken-links` report may take significant amount of time, because it will check each resource for availability.
+   Report generation can take a while to produce results. Especially `broken-links` report may take significant amount of time, because it will check each resource for availability.
 
 .. note::
 
