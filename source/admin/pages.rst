@@ -65,7 +65,7 @@ A page form for 'DE' language will appears. Enter the localized content for this
    :width: 600
    :align: center
 
-.. warning:: Make sure to use the same page name (the identifier) used for the same page in other languages (in this example 'news'). You have to click on the 'Modify' button in order to change the page's name for the URL field (see the image below)::
+.. warning:: Make sure to use the same page name (the identifier) used for the same page in other languages (in this example 'news'). You have to click on the 'Modify' button in order to change the page's name for the URL field (see the image below):
 					
 .. figure:: /admin/img/page8.png
    :width: 600
