@@ -483,6 +483,15 @@ This extension requires `ckanext-report` and `owslib` to be installed prior to u
 
 .. ckanext-gsreports-usage:
 
+-------------
+Configuration
+-------------
+
+Reports module has following configuration options:
+
+ * `ckanext.gsreport.resource_format.format_limit` - this option controls how many resources are shown in per-format view of `resources-format` report (default: 100). This should speed-up rendering of this report page, because in most popular formats, there can be tens of thousands of resources with that format. However, if you select specific organization, you should see all resources for that organization and selected format.
+
+
 -----
 Usage
 -----
@@ -557,6 +566,10 @@ Resource type report will show types of formats of resources.
 .. image:: ../images/reports/reports-view-resource-type.png
 
 Format name links to detailed report with all resources are using that format. Additionally, detailed report can be filtered by organization.
+
+.. note::
+
+    This view can contain large number of data, and because of that take significant amount of time to render. In order to avoid timeouts and see results quicker, you should set `ckanext.gsreport.resource_format.format_limit` value in your config. 
 
 
 .. image:: ../images/reports/reports-view-resource-type-type.png
