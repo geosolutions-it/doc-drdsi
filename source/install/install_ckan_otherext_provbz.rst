@@ -57,7 +57,7 @@ To install ckanext-provbz:
 
 	paster --plugin=ckanext-provbz provbzdb initdb --config=/etc/ckan/default/production.ini
 
-7. Add ``provbz_theme``  and ``provbz_harvester`` to the ``ckan.plugins`` setting in your CKAN
+7. Add ``provbz``  and ``provbz_harvester`` to the ``ckan.plugins`` setting in your CKAN
    config file (by default the config file is located at
    ``/etc/ckan/default/production.ini``).
 
@@ -135,13 +135,7 @@ Requirements
 The ckanext-multilang extension has been developed for CKAN 2.4.
 Other extensions needed as dependencies are:
 
-- https://github.com/geosolutions-it/ckanext-spatial
-
-.. warning:: The ckanext-multilang provides also an harvester built on the ckanext-spatial extension, and inherits all of its functionalities. Currently a forked branch of the stable ckanext-spatial extension is used in order to allow an after import stage functionality (used for the ckanext-multilang persistence):
-
-			 https://github.com/geosolutions-it/ckanext-spatial/tree/stable_official_after_imp_st
-			 
-			 Installing the ckanext-multilang extension make sure to use this fork and branch of the ckanext-spatial. The update will be ported on the official branch as soon as possible.
+- https://github.com/ckan/ckanext-spatial
 
 ------------
 Installation
@@ -173,21 +167,17 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
    
    Inside the 'fields' Tag::
    
-		<dynamicField name="multilang_localized_*" type="text" indexed="true" stored="true" multiValued="false"/>
+		<dynamicField name="package_multilang_localized_*" type="text" indexed="true" stored="true" multiValued="false"/>
    
    as first 'dynamicField'
    
    A new 'copyField' to append::
    
-		<copyField source="multilang_localized_*" dest="text"/>
+		<copyField source="package_multilang_localized_*" dest="text"/>
 
 9. Restart Solr.
 
 10. Restart CKAN.
-
-.. warning:: Make sure that the final order of the plugins list into the CKAN's configuration (production.ini file) is the folowing:: 
-
-	ckan.plugins = shibboleth datastore harvest ckan_harvester provbz_theme spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view multilang multilang_harvester provbz_harvester
 
 .. _extension_pages:
 
@@ -472,6 +462,8 @@ This extension requires `ckanext-report` and `owslib` to be installed prior to u
 3. Add `status_reports` to plugins. **Note** Order of entries matters. This plugin should be placed **before** `report` plugin.::
 
     ckan.plugins = .. status_reports report
+	
+.. warning:: Make sure that the provbz plugin is placed just after these reports plugins in the list
 
 4. Restart CKAN
 
@@ -814,6 +806,11 @@ Edit the file ``/etc/ckan/default/production.ini`` and:
 Eventually restart supervisord to make ckan reload the configuration::
 
      systemctl restart supervisord
+
+ 
+.. warning:: Make sure that the provbz plugin is placed after these reports plugins in the list. The final order of the plugins list into the CKAN's configuration (production.ini file) should the folowing:: 
+
+		ckan.plugins = shibboleth resource_proxy datastore harvest ckan_harvester spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view pdf_view multilang multilang_harvester provbz_harvester pages dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface status_reports report provbz dcatapit_pkg dcatapit_org dcatapit_config dcatapit_theme_group_mapper dcatapit_ckan_harvester dcatapit_harvest_list dcatapit_harvester dcatapit_csw_harvester external_resource_list
 
 
 ==================
