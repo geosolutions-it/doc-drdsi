@@ -20,7 +20,8 @@ Overview
 
 This extension provides plugins that allow CKAN to expose and consume metadata from other catalogs using RDF documents serialized according to the Italian DCAT Application Profile. The Data Catalog Vocabulary (DCAT) is "an RDF vocabulary designed to facilitate interoperability between data catalogs published on the Web".
 
-.. warning:: This extension has been developed in 2016 to allow Ckan to manage dataset in accordance to the DCAT-AP-It specifications. A migration documentation provides various steps to integrate the ckanext-dcatapit extansion into the existing environment.
+.. warning:: This extension has been developed in 2016 to allow Ckan to manage dataset in accordance to the DCAT-AP-It specifications. A migration documentation provides various steps to integrate the ckanext-dcatapit extension into the existing environment.
+.. warning:: If you're running old installation, you should read :ref:`Extension upgrade guide <dcatapit-upgrade>` section.
 
 Requirements
 ------------
@@ -119,6 +120,8 @@ This ckanext-provbz has been updated to integrate the old version of this extens
 
 		paster --plugin=ckan search-index rebuild  -c /etc/ckan/default/production.ini
 		
+
+ .. _dcatapit-installation:
 
 Installation 
 ------------       
@@ -372,13 +375,108 @@ In order to update the existing translations proceed as follow:
 3. Once the translation files (po) have been updated adding the new translations needed, compile them by running::
 
 		python setup.py compile_catalog --locale YOUR_LANGUAGE
+
+.. _dcatapit-upgrade:
+
+=================
+Extension upgrade
+=================
+
+DCAT_AP-IT Extension underwent significant modifications in various areas in the year 2018, especially in internal data format for various fields stored in database. Older installations may not display correcly some of extension-specific fields after straight code upgrade. In order to preserve existing data from older installation, you should run upgrade script that will convert old values to new format.
+
+1. Perform database dump (this is a safety measure, "just in case")::
+
+        su postgres
+    	pg_dump -U postgres -i ckan > ckan.dump
+
+2. Update extension code::
+
+        git pull
+
+3. Update the Solr schema, ensure that following fields are present in `schema.xml`::
+
+        <field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
+        <field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
+        <dynamicField name="dcat_subtheme_*" type="string" indexed="true" stored="false" multiValued="true"/>
+        <dynamicField name="organization_region_*" type="string" indexed="true" stored="false" multiValued="true"/>
+        <dynamicField name="resource_license_*" type="string" indexed="true" stored="false" multiValued="true"/>
+        <field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
+
+
+4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
+
+5. Activate the virtual environment::
+	
+	. /usr/lib/ckan/default/bin/activate
+
+6. Run model update::
+
+        paster --plugin=ckanext-dcatapit vocabulary initdb --config=/etc/ckan/default/production.ini
+
+7. Run vocabulary load commands (regions, licenses and sub-themes)::
+
+        wget "https://raw.githubusercontent.com/italia/daf-ontologie-vocabolari-controllati/master/VocabolariControllati/territorial-classifications/regions/regions.rdf" -O "/tmp/regions.rdf"
+        paster --plugin=ckanext-dcatapit vocabulary load --filename "/tmp/regions.rdf" --name regions --config "/etc/ckan/default/production.ini"
+        wget "https://raw.githubusercontent.com/italia/daf-ontologie-vocabolari-controllati/master/VocabolariControllati/licences/licences.rdf" -O "/tmp/licenses.rdf"
+        paster --plugin=ckanext-dcatapit vocabulary load --filename "/tmp/licenses.rdf" --name licenses --config "/etc/ckan/default/production.ini"
+        paster --plugin=ckanext-dcatapit vocabulary load --filename "ckanext-dcatapit/examples/eurovoc_mapping.rdf" --name subthemes --config "/etc/ckan/default/production.ini" "ckanext-dcatapit/examples/eurovoc.rdf"
+
+8. Run data migration command::
+
+        paster --plugin=ckanext-dcatapit vocabulary migrate_data --config=/etc/ckan/default/production.ini > migration.log
+
+ You can review migration results by viewing `migration.log` file. It will contain list of messages generated during migration. 
+
+ Migration script will:
+
+ * update all organizations and assign temporary identifier in form of `tmp_ipa_code_X` (where `X` is a number in sequence). Organization identifier is required field now, and thus temporary value is created to avoid errors in validation. Script will report each organization which have updated identifier in log with message similar to following: `org: [pab-foreste] PAB: Foreste : setting temporal identifier: tmp_ipa_code_X`
+
+ * update all packages and migrate DCAT_AP-IT fields. Where possible, it will try to transform those fields into new notation/format. Successful package data migration will be marked with message like this::
+
+        ---------
+        updating ortofoto-di-merano-2005
+        ---------
+
+ If migration of specific field is not possible for some reason, or conversion will not be clean, there will be a message like this::
+  
+    	dataset test-dataset: the same temporal coverage start/end: 01-01-2014/01-01-2014, using start only
+    	dataset test-dataset: no identifier. generating new one
+    	dataset test-dataset: invalid modified date Manuelle. Using now timestamp
+    	updating b36e6f42-d0eb-4b53-8e41-170c50a2384c occupati-e-disoccupati
+    	---------
+	
+9. Rebuild Solr indexes::
+
+		paster --plugin=ckan search-index rebuild -c /etc/ckan/default/production.ini
 		
+10. Restart Ckan
+
+Field conversion notes
+----------------------
+
+* `conforms_to` is more complex structure now. It contains identifier, title and description. Converter will use old string value as an identifier of standard, and if multilang values are present, they will populate description subfield of standard. In case of multilang values present, Italian translation will be used as identifier.
+
+* `creator` is a list of entities. It's composed of `creator_name` and `creator_identifier`, and converter will use existing values (including multilang name)
+
+* `temporal_coverage` is a list of entries, where each entry is constructed from two old fields: `temporal_start` and `temporal_end`. If both values are equal, only `temporal_start` will be used. Some values may not be parseable, and should be adjusted manually in dataset.
+
+* `theme` is required now, so if dataset lacks theme(s), default one (`OP_DATPRO`) will be assigned. Subthemes will be empty.
+
+* `identifier` is required now. If it's missing, new one (UUID) will be generated.
+
+* `modified` is required now. If it's missing or invalid, current date will be used.
+
+* `frequency` is required now. If it's missing or invalid `UNKNOWN` value will be used.
+
+* `holder_name` and `holder_identifier` behaves differently in new DCAT_AP-IT version. When dataset is created locally (wasn't harvested), rights holder information is gathered directly from organization to which dataset belongs. Organization is the source of `holder_name` and `holder_identifier` fields (including multilang name). However, harvested datasets will preserve original holder information that is attached to dataset. 
+
+
 ==================
 Document changelog
 ==================
 
-+---------+------+--------+---------------------------------------+
-| Version | Date | Author | Notes                                 |
-+=========+======+========+=======================================+
-| 1.0     |      |        | Initial revision                      |
-+---------+------+--------+---------------------------------------+
+ .. csv-table:: Changelog
+    :header: "Version", "Date", "Author", "Notes"
+
+    1.0,,,Initial revision
+    1.1,2018-08-29,CS,Migration section
