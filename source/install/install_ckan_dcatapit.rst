@@ -403,7 +403,7 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
         <field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
 
 
-4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see :ref:`Installation <dcatapit-installation>` paragraph).
+4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
 
 5. Run model update::
 
@@ -450,11 +450,11 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 Field conversion notes
 ----------------------
 
-* `conforms_to` is more complex structure now. It contains identificator, title and description. Converter will use old string value as an identifier of standard, and if multilang values are present, they will populate description subfield of standard. In case of multilang values present, Italian translation will be used as identifier.
+* `conforms_to` is more complex structure now. It contains identifier, title and description. Converter will use old string value as an identifier of standard, and if multilang values are present, they will populate description subfield of standard. In case of multilang values present, Italian translation will be used as identifier.
 
 * `creator` is a list of entities. It's composed of `creator_name` and `creator_identifier`, and converter will use existing values (including multilang name)
 
-* `temporal_coverage` is a list of entries, where each entry is constructed from two old fields: `temporal_start` and `temporal_end`. If both values are equal, only `temporal_start` will be used. Some values may not be parseable, and should be aadjusted manually in dataset.
+* `temporal_coverage` is a list of entries, where each entry is constructed from two old fields: `temporal_start` and `temporal_end`. If both values are equal, only `temporal_start` will be used. Some values may not be parseable, and should be adjusted manually in dataset.
 
 * `theme` is required now, so if dataset lacks theme(s), default one (`OP_DATPRO`) will be assigned. Subthemes will be empty.
 
