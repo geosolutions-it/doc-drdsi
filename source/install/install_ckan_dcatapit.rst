@@ -20,7 +20,7 @@ Overview
 
 This extension provides plugins that allow CKAN to expose and consume metadata from other catalogs using RDF documents serialized according to the Italian DCAT Application Profile. The Data Catalog Vocabulary (DCAT) is "an RDF vocabulary designed to facilitate interoperability between data catalogs published on the Web".
 
-.. warning:: This extension has been developed in 2016 to allow Ckan to manage dataset in accordance to the DCAT-AP-It specifications. A migration documentation provides various steps to integrate the ckanext-dcatapit extansion into the existing environment.
+.. warning:: This extension has been developed in 2016 to allow Ckan to manage dataset in accordance to the DCAT-AP-It specifications. A migration documentation provides various steps to integrate the ckanext-dcatapit extension into the existing environment.
 .. warning:: If you're running old installation, you should read :ref:`Extension upgrade guide <dcatapit-upgrade>` section.
 
 Requirements
@@ -405,11 +405,15 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 
 4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
 
-5. Run model update::
+5. Activate the virtual environment:
+
+	. /usr/lib/ckan/default/bin/activate
+
+6. Run model update::
 
         paster --plugin=ckanext-dcatapit vocabulary initdb --config=/etc/ckan/default/production.ini
 
-6. Run vocabulary load commands (regions, licenses and sub-themes)::
+7. Run vocabulary load commands (regions, licenses and sub-themes)::
 
         wget "https://raw.githubusercontent.com/italia/daf-ontologie-vocabolari-controllati/master/VocabolariControllati/territorial-classifications/regions/regions.rdf" -O "/tmp/regions.rdf"
         paster --plugin=ckanext-dcatapit vocabulary load --filename "/tmp/regions.rdf" --name regions --config "/etc/ckan/default/production.ini"
@@ -417,7 +421,7 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
         paster --plugin=ckanext-dcatapit vocabulary load --filename "/tmp/licenses.rdf" --name licenses --config "/etc/ckan/default/production.ini"
         paster --plugin=ckanext-dcatapit vocabulary load --filename "ckanext-dcatapit/examples/eurovoc_mapping.rdf" --name subthemes --config "/etc/ckan/default/production.ini" "ckanext-dcatapit/examples/eurovoc.rdf"
 
-7. Run data migration command::
+8. Run data migration command::
 
         paster --plugin=ckanext-dcatapit vocabulary migrate_data --config=/etc/ckan/default/production.ini > migration.log
 
@@ -441,11 +445,11 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
     	updating b36e6f42-d0eb-4b53-8e41-170c50a2384c occupati-e-disoccupati
     	---------
 	
-8. Rebuild Solr indexes::
+9. Rebuild Solr indexes::
 
 		paster --plugin=ckan search-index rebuild -c /etc/ckan/default/production.ini
 		
-9. Restart Ckan
+10. Restart Ckan
 
 Field conversion notes
 ----------------------
