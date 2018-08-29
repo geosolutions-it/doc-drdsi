@@ -405,8 +405,8 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 
 4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
 
-5. Activate the virtual environment:
-
+5. Activate the virtual environment::
+	
 	. /usr/lib/ckan/default/bin/activate
 
 6. Run model update::
