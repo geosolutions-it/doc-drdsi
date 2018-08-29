@@ -21,6 +21,7 @@ Overview
 This extension provides plugins that allow CKAN to expose and consume metadata from other catalogs using RDF documents serialized according to the Italian DCAT Application Profile. The Data Catalog Vocabulary (DCAT) is "an RDF vocabulary designed to facilitate interoperability between data catalogs published on the Web".
 
 .. warning:: This extension has been developed in 2016 to allow Ckan to manage dataset in accordance to the DCAT-AP-It specifications. A migration documentation provides various steps to integrate the ckanext-dcatapit extansion into the existing environment.
+.. warning:: If you're running old installation, you should read :ref:`Extension upgrade guide <dcatapit-upgrade>` section.
 
 Requirements
 ------------
@@ -374,7 +375,9 @@ In order to update the existing translations proceed as follow:
 3. Once the translation files (po) have been updated adding the new translations needed, compile them by running::
 
 		python setup.py compile_catalog --locale YOUR_LANGUAGE
-		
+
+.. _dcatapit-upgrade:
+
 =================
 Extension upgrade
 =================
@@ -447,14 +450,21 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 Field conversion notes
 ----------------------
 
- * `conforms_to` is more complex structure now. It contains identificator, title and description. Converter will use old string value as an identifier of standard, and if multilang values are present, they will populate description subfield of standard. In case of multilang values present, Italian translation will be used as identifier.
- * `creator` is a list of entities. It's composed of `creator_name` and `creator_identifier`, and will use existing values (including multilang name)
- * `temporal_coverage` is a list of entries, where each entry is constructed from two old fields: `temporal_start` and `temporal_end`. If both values are equal, only `temporal_start` will be used. Some values may not be parseable, and should be aadjusted manually in dataset.
- * `theme` is required now, so if dataset lacks theme(s), default one (`OP_DATPRO`) will be assigned. Subthemes will be empty.
- * `identifier` is required now. If it's missing, new one (uuid) will be generated.
- * `modified` is required now. If it's missing or invalid, current date will be used.
- * `frequency` is required now. If it's missing or invalid `UNKNOWN` value will be used.
- * `holder_name` and `holder_identifier` behaves differently in new DCAT_AP-IT version. When dataset is created locally (wasn't harvested), rights holder information is gathered directly from organization to which dataset belongs. Organization is the source of `holder_name` and `holder_identifier` fields (including multilang name). However, harvested datasets will preserve original holder information that is attached to dataset. 
+* `conforms_to` is more complex structure now. It contains identificator, title and description. Converter will use old string value as an identifier of standard, and if multilang values are present, they will populate description subfield of standard. In case of multilang values present, Italian translation will be used as identifier.
+
+* `creator` is a list of entities. It's composed of `creator_name` and `creator_identifier`, and converter will use existing values (including multilang name)
+
+* `temporal_coverage` is a list of entries, where each entry is constructed from two old fields: `temporal_start` and `temporal_end`. If both values are equal, only `temporal_start` will be used. Some values may not be parseable, and should be aadjusted manually in dataset.
+
+* `theme` is required now, so if dataset lacks theme(s), default one (`OP_DATPRO`) will be assigned. Subthemes will be empty.
+
+* `identifier` is required now. If it's missing, new one (UUID) will be generated.
+
+* `modified` is required now. If it's missing or invalid, current date will be used.
+
+* `frequency` is required now. If it's missing or invalid `UNKNOWN` value will be used.
+
+* `holder_name` and `holder_identifier` behaves differently in new DCAT_AP-IT version. When dataset is created locally (wasn't harvested), rights holder information is gathered directly from organization to which dataset belongs. Organization is the source of `holder_name` and `holder_identifier` fields (including multilang name). However, harvested datasets will preserve original holder information that is attached to dataset. 
 
 
 ==================
