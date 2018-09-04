@@ -388,12 +388,13 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 
         su postgres
     	pg_dump -U postgres -i ckan > ckan.dump
+	pg_dump -U postgres -i datastore > datastore.dump
 
-2. Update extension code::
+2. Update extension code (both **ckanext-dcatapit** and **ckanext-multilang** need to be updated)::
 
         git pull
 
-3. Update the Solr schema, ensure that following fields are present in `schema.xml`::
+3. Update the Solr schema, ensure that following fields are present in `schema.xml`, **then restart Solr**::
 
         <field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
         <field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
@@ -404,6 +405,33 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 
 
 4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
+
+Below the main involved configuration is reported::
+
+	## Plugins Settings
+
+	# Note: Add ``datastore`` to enable the CKAN DataStore
+	#       Add ``datapusher`` to enable DataPusher
+	#		Add ``resource_proxy`` to enable resorce proxying and get around the
+	#		same origin policy
+	ckan.plugins = resource_proxy datastore harvest ckan_harvester spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view pdf_view multilang multilang_harvester shibboleth pages dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface external_resource_list status_reports report provbz provbz_harvester datapusher dcatapit_pkg dcatapit_org dcatapit_config dcatapit_theme_group_mapper dcatapit_ckan_harvester dcatapit_harvest_list dcatapit_harvester dcatapit_csw_harvester
+
+	## Old DCATAPIT Settings ------------
+	ckanext.dcat.rdf.profiles = euro_dcat_ap it_dcat_ap
+	ckanext.dcat.base_uri = http://test-dati.retecivica.bz.it
+
+	## New DCATAPIT Settings ------------
+
+	ckanext.dcat.expose_subcatalogs = False
+	ckanext.dcat.clean_tags = True
+	ckanext.dcatapit.form_tabs = True
+	ckanext.dcatapit.localized_resources = True
+
+	#ckanext.dcatapit.theme_group_mapping.file = /etc/ckan/theme_to_group.ini
+	#ckanext.dcatapit.nonconformant_themes_mapping.file = /etc/ckan/topics.json
+
+	geonames.username = XXX
+	geonames.limits.countries = IT
 
 5. Activate the virtual environment::
 	
