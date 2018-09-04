@@ -414,7 +414,7 @@ Below the main involved configuration is reported::
 	#       Add ``datapusher`` to enable DataPusher
 	#		Add ``resource_proxy`` to enable resorce proxying and get around the
 	#		same origin policy
-	ckan.plugins = resource_proxy datastore harvest ckan_harvester spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view pdf_view multilang multilang_harvester shibboleth pages dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface external_resource_list status_reports report provbz provbz_harvester datapusher dcatapit_pkg dcatapit_org dcatapit_config dcatapit_theme_group_mapper dcatapit_ckan_harvester dcatapit_harvest_list dcatapit_harvester dcatapit_csw_harvester
+	ckan.plugins = resource_proxy datastore harvest ckan_harvester spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view pdf_view multilang multilang_harvester shibboleth pages dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface external_resource_list status_reports report provbz provbz_harvester datapusher **dcatapit_pkg dcatapit_org dcatapit_config dcatapit_theme_group_mapper dcatapit_ckan_harvester dcatapit_harvest_list dcatapit_harvester dcatapit_csw_harvester**
 
 	## Old DCATAPIT Settings ------------
 	ckanext.dcat.rdf.profiles = euro_dcat_ap it_dcat_ap
