@@ -393,18 +393,18 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
 
 2.  The following extensions need to be updated::
 
-	- **ckanext-dcatapit**
-	- **ckanext-multilang**
-	- **ckanext-provbz**
-	- **ckanext-dcat**
+	- ckanext-dcatapit
+	- ckanext-multilang
+	- ckanext-provbz
+	- ckanext-dcat
 	
-	for **ckanext-dcatapit**, **ckanext-multilang** and **ckanext-provbz** go into the extension directory and run the following commands::
+for **ckanext-dcatapit**, **ckanext-multilang** and **ckanext-provbz** go into the extension directory and run the following commands::
 	
         git pull
 		. /usr/lib/ckan/default/bin/activate
 		pip install -e .
 		
-	for **ckanext-dcat**::
+for **ckanext-dcat**::
 	
 	    git pull
 		. /usr/lib/ckan/default/bin/activate
