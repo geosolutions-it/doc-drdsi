@@ -56,9 +56,10 @@ This ckanext-provbz has been updated to integrate the old version of this extens
 
 		cd ckanext-dcat
 
+		pip install -r requirements.txt
+		
 		pip install -e .
 
-		pip install -r requirements.txt
 		
 	- Edit the `/etc/ckan/default/production.ini` adding plugins:
 	
@@ -390,19 +391,36 @@ DCAT_AP-IT Extension underwent significant modifications in various areas in the
     	pg_dump -U postgres -i ckan > ckan.dump
 	pg_dump -U postgres -i datastore > datastore.dump
 
-2. Update extension code (both **ckanext-dcatapit** and **ckanext-multilang** need to be updated)::
+2.  The following extensions need to be updated::
 
+	- **ckanext-dcatapit**
+	- **ckanext-multilang**
+	- **ckanext-provbz**
+	- **ckanext-dcat**
+	
+	for **ckanext-dcatapit**, **ckanext-multilang** and **ckanext-provbz** go into the extension directory and run the following commands::
+	
         git pull
+		. /usr/lib/ckan/default/bin/activate
+		pip install -e .
+		
+	for **ckanext-dcat**::
+	
+	    git pull
+		. /usr/lib/ckan/default/bin/activate
+		pip install -r requirements.txt
+		pip install -e .		
 
-3. Update the Solr schema, ensure that following fields are present in `schema.xml`, **then restart Solr**::
+3. Update the Solr schema, ensure that following fields are present in `schema.xml` (located at */etc/solr/ckan/conf*) inside the *<fields>* XML tag, **then restart Solr**::
 
-        <field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
-        <field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
-        <dynamicField name="dcat_subtheme_*" type="string" indexed="true" stored="false" multiValued="true"/>
-        <dynamicField name="organization_region_*" type="string" indexed="true" stored="false" multiValued="true"/>
-        <dynamicField name="resource_license_*" type="string" indexed="true" stored="false" multiValued="true"/>
-        <field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
+		<!-- DCATAPIT fields -->
 
+		<field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
+		<field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
+		<dynamicField name="dcat_subtheme_*" type="string" indexed="true" stored="false" multiValued="true"/>
+		<dynamicField name="organization_region_*" type="string" indexed="true" stored="false" multiValued="true"/>
+		<dynamicField name="resource_license_*" type="string" indexed="true" stored="false" multiValued="true"/>
+		<field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
 
 4. Ensure that all the configuration properties required by the new version have been properly provided in .ini file (see `Installation <https://github.com/geosolutions-it/ckanext-dcatapit#installation>`_ paragraph).
 
