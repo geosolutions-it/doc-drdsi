@@ -75,6 +75,195 @@ To install ckanext-provbz:
 
 11. Restart CKAN.
 
+
+========================
+Authentication Extension
+========================
+
+Provincia di Bolzano uses an authentication system that has some mechanics inherited from Shibboleth.
+An external system will perform user authentication, and user info will be passed to CKAN via HTTP headers.
+
+An ad-hoc extension has been implemented to deal with this external system.
+
+The authenticator plugin repository is at https://github.com/geosolutions-it/ckanext-provbz-auth
+
+------------
+Installation
+------------
+
+Activate your CKAN virtual environment::
+
+   . /usr/lib/ckan/default/bin/activate
+
+Go into your CKAN path for extension::
+
+   cd /usr/lib/ckan/default/src
+
+Import the project from the github repository and install it::
+
+   git clone https://github.com/geosolutions-it/ckanext-provbz-auth.git
+   cd ckanext-provbz-auth
+   python setup.py install
+
+--------------------
+Plugin configuration
+--------------------
+
+You have to configure the provbz-auth plugin.
+There are a couple of configuration files to edit:
+
+``/etc/ckan/default/production.ini``
+
+   - Tells CKAN to load the provbz-auth plugin
+
+``/etc/ckan/default/who.ini``
+
+   - Tells the auth framework to use the provbz-auth plugin for authentication.
+   - Tells the provbz-auth plugin how to retrieve the info about the authenticated user.
+
+
+``production.ini`` configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Edit the file ``/etc/ckan/default/production.ini`` and append ``provbz_auth`` to the ``ckan.plugins`` line::
+
+     ckan.plugins = [...] provbz_auth
+
+Configure external login and logout URLs::
+
+     ckanext.provbzauth.login_url = https://test-data.civis.bz.it/Shibboleth.sso/Login?target=https%3A%2F%2Ftest-data.civis.bz.it&authnContextClassRef=SPID+CNS+PROV.BZ+SIAG.IT+GVCC.NET+lang%3a{{LANG}}
+     ckanext.provbzauth.logout_url = https://test-data.civis.bz.it/Shibboleth.sso/Logout
+
+
+``who.ini`` configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Inside the directory ``/etc/ckan/default/`` we created the symbolic link ``who.ini``
+linking the file ``/usr/lib/ckan/default/src/ckan/who.ini``.
+We need to edit this file to configure some info for the provbz-auth integration.
+We don't want to modifiy the original file so we'll have to:
+
+- Rename the symbolic link so we still have a reference to the original file::
+
+   mv /etc/ckan/default/who.ini /etc/ckan/default/orig.who.ini
+
+- Create a new file copy to edit::
+
+   cp /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/provbz-auth.who.ini
+
+- Create a symlink, so you may easily switch back to the original configuration should you need to::
+
+   ln -s /etc/ckan/default/provbz-auth.who.ini /etc/ckan/default/who.ini
+
+Now let's edit the ``/etc/ckan/default/provbz-auth.who.ini`` file.
+
+Add the ``plugin:provbz_auth`` section, customizing the env var names::
+
+   [plugin:provbz_auth]
+   use = ckanext.provbzauth.repoze.ident:make_identification_plugin
+
+   eppn = HTTP_SHIB_IDP_UID
+   authtype = HTTP_SHIB_AUTHTYPE
+
+   check_auth_key = HTTP_SHIB_ORIGINAL_AUTHENTICATION_INSTANT
+   check_auth_op = not_empty
+
+   pm_url = https://test-profilemanager.....
+   pm_user = ....
+   pm_pw = ....
+
+Add ``provbz_auth`` to the list of the identifier plugins::
+
+    [identifiers]
+    plugins =
+        provbz_auth
+        friendlyform;browser
+        auth_tkt
+
+Add ``ckanext.provbzauth.repoze.auth:ProvBzAuthenticator`` to the list of the authenticator plugins::
+
+    [authenticators]
+    plugins =
+        auth_tkt
+        ckan.lib.authenticator:UsernamePasswordAuthenticator
+        ckanext.provbzauth.repoze.auth:ProvBzAuthenticator
+
+Add ``provbz_auth`` to the list of the challengers plugins::
+
+    [challengers]
+    plugins =
+        provbz_auth
+    #   friendlyform;browser
+    #   basicauth
+
+
+Apache HTTPD configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ckanext-provbz-auth extension requires that a couple of external URLs (login and logout) are handled by the external system.
+The URLs are the ones defined in the ``ckanext.provbzauth.*_url`` properties.
+
+:download:`This is the complete ckan.conf configuration file <resources/92_ckan.conf>` you can use as a reference.
+
+CKAN locales configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ckanext-provbz-auth extension defines some own locale strings defined into the internal .mo and .po files at ``ckanext-provbz-auth/ckanext/provbzauth/i18n/``.
+As reported above, for the ckanext-provbz installation steps, at this point you have already updated the default CKAN's locale files.
+So the locales information of the ckanext-provbz-auth extension should be just appended to the existing ones ('it' and 'de') in CKAN as described below:
+
+1 - Open the file::
+
+	ckanext-provbz-auth/ckanext/provbzauth/i18n/it/LC_MESSAGES/ckanext-provbz-auth.po
+
+2 - Copy the content reported below::
+
+	#: ckanext/repoze/who/shibboleth/controller.py:25
+	msgid "No user info received for login"
+	msgstr "Non sono state ricevute informazioni sull'utente"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:25
+	msgid "Shibboleth"
+	msgstr "Shibboleth"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:26
+	msgid "Login through Shibboleth."
+	msgstr "Accedi attraverso Shibboleth"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:33
+	msgid "Login via Shibboleth"
+	msgstr "Accedi attraverso Shibboleth"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:45
+	msgid "Authentication by using local account"
+	msgstr "Autenticazione con account locale"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:49
+	msgid "Username"
+	msgstr "Nome utente"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:50
+	msgid "Password"
+	msgstr "Password"
+
+	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:59
+	msgid "Log in"
+	msgstr "Accedi"
+
+3 - Append it at the end of the CKAN's related file for 'it'::
+
+	ckan/ckan/i18n/it/LC_MESSAGES/ckan.po
+
+4 - Rebuild the ckan.mo file with the updated content using the following command::
+
+	cd /usr/lib/ckan/default/src/ckan
+	. /usr/lib/ckan/default/bin/activate
+
+	python setup.py compile_catalog --locale it
+
+5 - Repeat the steps above for the 'de' locales and finally restart CKAN.
+
+
 ====================
 GeoNetwork harvester
 ====================
@@ -141,11 +330,11 @@ Other extensions needed as dependencies are:
 Installation
 ------------
 
-In order to install the extension, log in as user ``ckan``, activate the virtual env and check out the extension::
+In order to install the extension, log in as user ``ckan``, activate the virtual env and check out the extension:
 
 1. Activate your CKAN virtual environment, for example::
 
-	. /usr/lib/ckan/default/bin/activate
+      . /usr/lib/ckan/default/bin/activate
 
 2. Go into your CKAN path for extension (like /usr/lib/ckan/default/src)
 
@@ -157,7 +346,7 @@ In order to install the extension, log in as user ``ckan``, activate the virtual
 
 6. Initilize the multilang tables::
 
-	paster --plugin=ckanext-multilang multilangdb initdb --config=/etc/ckan/default/production.ini
+      paster --plugin=ckanext-multilang multilangdb initdb --config=/etc/ckan/default/production.ini
 
 7. Add ``multilang`` and ``multilang_harvester`` to the ``ckan.plugins`` setting in your CKAN
    config file (by default the config file is located at
@@ -228,200 +417,6 @@ Enable the plugin by appending the name of the extension to the plugin property:
 	
 Finally restart CKAN.
 
-====================
-Shibboleth Extension
-====================
-
-The Shibboleth plugin will allow users to log in into CKAN using an existing Shibboleh environment.  
-
-.. hint:: The CKAN shibboleth plugin repository is at http://github.com/geosolutions-it/ckanext-shibboleth
-
-------------
-Installation
-------------
-
-Activate your CKAN virtual environment::
-
-   . /usr/lib/ckan/default/bin/activate
-
-Go into your CKAN path for extension::
-
-   cd /usr/lib/ckan/default/src
-
-Import the project from the github repository and install it::
-
-   git clone https://github.com/geosolutions-it/ckanext-shibboleth.git
-   cd ckanext-shibboleth
-   python setup.py install
-        
---------------------	
-Plugin configuration
---------------------
-
-You have to configure the shibboleth plugin.
-There are a couple of configuration files to edit:
-
-``/etc/ckan/default/production.ini``
-
-   - Tells CKAN to load the shibboleth plugin
-    
-``/etc/ckan/default/who.ini``
-
-   - Tells the auth framework to use the shibboleth plugin for authentication.
-   - Tells the shibboleh plugin how to retrieve the info about the authenticated user.  
-
-
-``production.ini`` configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Edit the file ``/etc/ckan/default/production.ini`` and append ``shibboleth`` to the ``ckan.plugins`` line::
-
-     ckan.plugins = [...] shibboleth
-    
-
-``who.ini`` configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Inside the directory ``/etc/ckan/default/`` we created the symbolic link ``who.ini`` 
-linking the file ``/usr/lib/ckan/default/src/ckan/who.ini``.
-We need to edit this file to configure some info for the shibboleth integration.
-We don't want to modifiy the original file so we'll have to:
-
-- Rename the symbolic link so we still have a reference to the original file::
-
-   mv /etc/ckan/default/who.ini /etc/ckan/default/orig.who.ini
-   
-- Create a new file copy to edit::   
-
-   cp /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/shibboleth.who.ini
-    
-- Create a symlink, so you may easily switch back to the original configuration should you need to::
-
-   ln -s /etc/ckan/default/shibboleth.who.ini /etc/ckan/default/who.ini
- 
-Now let's edit the ``/etc/ckan/default/shibboleth.who.ini`` file.
-
-Add the ``plugin:shibboleth`` section, customizing the env var names::
-
-   [plugin:shibboleth]
-   use = ckanext.shibboleth.repoze.ident:make_identification_plugin
-   
-   session = HTTP_SHIB_SESSION_ID
-   eppn = HTTP_UID
-   mail = NO_MAIL_HEADER
-   fullname = HTTP_SN
-   
-   check_auth_key=HTTP_SHIB_AUTHENTICATION_METHOD
-   check_auth_value=urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
- 
-- ``session`` is used to identify the session id read by the shibboleth integration;
-- ``eppn`` is the identifier used to uniquely identify the user;
-- ``mail`` is the user mail address. You may set it to a name that will not be resolved; the user's mail address will be left blank, 
-  and the user will be reminded about this at every login;
-- ``fullname`` is the string used as the username in CKAN, displayed on the UI;
-- ``check_auth_key`` and ``check_auth_value`` are needed to find out if we are properly receiving info from the Shibboleth module.
-
-
-Add ``shibboleth`` to the list of the identifier plugins::
-
-    [identifiers]
-    plugins =
-        shibboleth
-        friendlyform;browser
-        auth_tkt
-
-Add ``ckanext.shibboleth.repoze.auth:ShibbolethAuthenticator`` to the list of the authenticator plugins::
-
-    [authenticators]
-    plugins =
-        auth_tkt
-        ckan.lib.authenticator:UsernamePasswordAuthenticator
-        ckanext.shibboleth.repoze.auth:ShibbolethAuthenticator
-
-Add ``shibboleth`` to the list of the challengers plugins::
-
-    [challengers]
-    plugins =
-        shibboleth
-    #    friendlyform;browser
-    #   basicauth
-
-
-Apache HTTPD configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ckanext-shibboleth extension requires that the ``/shibboleth`` path to be externally filtered by the shibboleth
-client module.
-
-Using ``mod_shib`` on your apache httpd installation, you need these lines in your configuration file::
-
-    <Location ~ /shibboleth >
-        AuthType shibboleth
-        ShibRequireSession On
-        require valid-user
-    </Location>
-
-
-:download:`This is the complete ckan.conf configuration file <resources/92_ckan.conf>` you can use as a reference.
-
-CKAN locales configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ckanext-shibboleth extension defines some own locale strings defined into the internal .mo and .po files at ``ckanext-shibboleth/ckanext/shibboleth/i18n/``.
-As reported above, for the ckanext-provbz installation steps, at this point you have already updated the default CKAN's locale files. So the locales information of the 
-ckanext-shibboleth extension should be just appended to the existing ones ('it' and 'de') in CKAN as described below:
-
-1 - Open the file::
-
-	ckanext-shibboleth/ckanext/shibboleth/i18n/it/LC_MESSAGES/ckanext-shibboleth.po
-
-2 - Copy the content reported below::
-
-	#: ckanext/repoze/who/shibboleth/controller.py:25
-	msgid "No user info received for login"
-	msgstr "Non sono state ricevute informazioni sull'utente"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:25
-	msgid "Shibboleth"
-	msgstr "Shibboleth"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:26
-	msgid "Login through Shibboleth."
-	msgstr "Accedi attraverso Shibboleth"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:33
-	msgid "Login via Shibboleth"
-	msgstr "Accedi attraverso Shibboleth"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:45
-	msgid "Authentication by using local account"
-	msgstr "Autenticazione con account locale"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:49
-	msgid "Username"
-	msgstr "Nome utente"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:50
-	msgid "Password"
-	msgstr "Password"
-
-	#: ckanext/repoze/who/shibboleth/templates/user/snippets/login_form.html:59
-	msgid "Log in"
-	msgstr "Accedi"
-	
-3 - Append it at the end of the CKAN's related file for 'it'::
-
-	ckan/ckan/i18n/it/LC_MESSAGES/ckan.po
-
-4 - Rebuild the ckan.mo file with the updated content using the following command::
-
-	cd /usr/lib/ckan/default/src/ckan
-	. /usr/lib/ckan/default/bin/activate
-	
-	python setup.py compile_catalog --locale it
-	
-5 - Repete the steps above for the 'de' locales and finally restart CKAN.
-	
 
 .. _ckanext-gsreports-extension:
 
@@ -808,7 +803,7 @@ Eventually restart supervisord to make ckan reload the configuration::
      systemctl restart supervisord
 
  
-.. warning:: Make sure that the provbz plugin is placed after these reports plugins in the list. The final order of the plugins list into the CKAN's configuration (production.ini file) should the folowing:: 
+.. warning:: Make sure that the provbz plugin is placed after these reports plugins in the list. The final order of the plugins list into the CKAN's configuration (production.ini file) should the following:
 
 		ckan.plugins = shibboleth resource_proxy datastore harvest ckan_harvester spatial_metadata spatial_query csw_harvester geonetwork_harvester stats text_view image_view recline_view pdf_view multilang multilang_harvester provbz_harvester pages dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface status_reports report provbz dcatapit_pkg dcatapit_org dcatapit_config dcatapit_theme_group_mapper dcatapit_ckan_harvester dcatapit_harvest_list dcatapit_harvester dcatapit_csw_harvester external_resource_list
 
@@ -817,13 +812,16 @@ Eventually restart supervisord to make ckan reload the configuration::
 Document changelog
 ==================
 
-+---------+------+--------+---------------------------------------+
-| Version | Date | Author | Notes                                 |
-+=========+======+========+=======================================+
-| 1.0     |      |        | Initial revision                      |
-+---------+------+--------+---------------------------------------+
-| 1.1     |      |        | Improve doc for installing shibboleth |
-+---------+------+--------+---------------------------------------+
-| 1.2     | 2018 | CS     | Updated information on additional     |
-|         | 05-25|        | extensions                            |
-+---------+------+--------+---------------------------------------+
++-----------+--------+---------------------------------------+
+| Date      | Author | Notes                                 |
++===========+========+=======================================+
+|           |        | Initial revision                      |
++-----------+--------+---------------------------------------+
+|           |        | Improve doc for installing shibboleth |
++-----------+--------+---------------------------------------+
+|2018-05-25 | CS     | Updated information on additional     |
+|           |        | extensions                            |
++-----------+--------+---------------------------------------+
+|2019-01-29 | ETj    | Replace shibboleth with provbz-auth   |
+|           |        |                                       |
++-----------+--------+---------------------------------------+
